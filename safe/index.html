@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cassaforte</title>
+  <style>
+    :root{--bg:#0f0f10;--card:#17171a;--text:#fff;--muted:rgba(255,255,255,.78);
+      --border:rgba(255,255,255,.10);--btn:#2a2a2e;--good:#2bff4a;--bad:#ff4b4b;}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;text-align:center}
+    .wrap{max-width:560px;margin:0 auto;padding:16px}
+    .host{display:flex;gap:12px;align-items:center;margin:10px 0 14px;text-align:left}
+    .avatar{width:66px;height:66px;border-radius:16px;background:var(--card);border:1px solid var(--border);
+      overflow:hidden;box-shadow:0 12px 26px rgba(0,0,0,.45)}
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .bubble{flex:1;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:10px 12px;
+      box-shadow:0 12px 26px rgba(0,0,0,.45)}
+    .bubble b{display:block;margin-bottom:4px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px;box-shadow:0 14px 30px rgba(0,0,0,.50)}
+    h1,h2{margin:8px 0}
+    p{margin:10px 0;color:var(--muted);line-height:1.35}
+    button{padding:12px 14px;border:0;border-radius:14px;background:var(--btn);color:#fff;font-size:16px;box-shadow:0 10px 22px rgba(0,0,0,.35)}
+    button:active{transform:translateY(1px)}
+    .kbd{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:360px;margin:12px auto 0}
+    .hint{font-size:14px;color:var(--muted);margin-top:10px}
+    .msg{min-height:22px;margin-top:10px}
+    .ok{color:var(--good);font-weight:900}
+    .no{color:var(--bad);font-weight:900}
+
+    /* Cassaforte */
+    .safe-stage{position:relative;width:min(92vw,340px);aspect-ratio:1/1;margin:14px auto 6px}
+    .bodySafe{position:absolute;inset:0;border-radius:22px;background:linear-gradient(145deg,#3a3a40,#1f1f24);
+      border:10px solid #666;box-shadow:inset 0 0 0 2px rgba(255,255,255,.05), 0 18px 40px rgba(0,0,0,.55);}
+    .bodySafe:before{content:"";position:absolute;inset:14px;border-radius:16px;border:2px solid rgba(255,255,255,.08)}
+    .hinge{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:120px;background:#2a2a2e;border-radius:10px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.06)}
+    .door{position:absolute;inset:0;border-radius:22px;background:linear-gradient(145deg,#4a4a52,#232329);
+      border:10px solid rgba(255,255,255,.10);box-shadow:inset 0 0 0 2px rgba(0,0,0,.35);
+      transform-origin:left center;transform:perspective(900px) rotateY(0deg);}
+    .door:before{content:"";position:absolute;inset:14px;border-radius:16px;border:2px solid rgba(255,255,255,.10)}
+    .display{position:absolute;left:22px;top:26px;right:22px;background:#050506;border:2px solid rgba(255,255,255,.08);
+      color:var(--good);font-size:34px;padding:12px 10px;border-radius:14px;letter-spacing:.18em;text-shadow:0 0 10px rgba(43,255,74,.25)}
+    .dial{position:absolute;right:18px;top:52px;width:110px;height:110px;border-radius:999px;
+      background:radial-gradient(circle at 30% 30%,#666,#2a2a2e 60%,#151517 100%);border:4px solid rgba(255,255,255,.12);
+      box-shadow:inset 0 0 0 3px rgba(0,0,0,.45);display:grid;place-items:center}
+    .dial:after{content:"";width:10px;height:10px;border-radius:999px;background:#0f0f10;box-shadow:0 0 0 3px rgba(255,255,255,.12)}
+    .bolt{position:absolute;left:22px;bottom:26px;width:86px;height:14px;border-radius:999px;background:#1b1b1f;border:1px solid rgba(255,255,255,.10)}
+    .open .door{animation:openDoor 1.25s cubic-bezier(.2,.85,.2,1) forwards}
+    @keyframes openDoor{0%{transform:perspective(900px) rotateY(0deg)}60%{transform:perspective(900px) rotateY(-70deg)}100%{transform:perspective(900px) rotateY(-92deg)}}
+
+    /* Voucher */
+    .voucher{margin:14px auto 0;max-width:420px;background:linear-gradient(180deg,#1a1a1e,#131316);
+      border:2px dashed rgba(255,255,255,.35);border-radius:18px;padding:16px;position:relative;text-align:left;
+      box-shadow:0 18px 40px rgba(0,0,0,.55)}
+    .topline{font-size:12px;letter-spacing:.16em;opacity:.8}
+    .title{font-size:22px;margin-top:8px}
+    .place{font-size:18px;margin-top:6px}
+    .note{font-size:13px;margin-top:10px;opacity:.85;line-height:1.35}
+    .stamp{position:absolute;right:14px;top:14px;width:94px;height:94px;border-radius:999px;border:3px solid rgba(255,80,80,.9);
+      box-shadow:0 0 0 3px rgba(0,0,0,.25), 0 10px 20px rgba(0,0,0,.35);transform:rotate(-12deg);
+      display:grid;place-items:center;opacity:.95}
+    .stamp span{font-weight:900;font-size:11px;letter-spacing:.18em;color:rgba(255,80,80,.95);text-align:center;line-height:1.1}
+    .stamp:before{content:"";position:absolute;inset:8px;border-radius:999px;border:2px dashed rgba(255,80,80,.85)}
+    .fakeqr{position:absolute;right:16px;bottom:14px;width:72px;height:72px;border-radius:10px;
+      background:linear-gradient(90deg, rgba(255,255,255,.12) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.12) 50%, rgba(255,255,255,.12) 75%, transparent 75%) 0 0/12px 12px,
+             linear-gradient(0deg, rgba(255,255,255,.10) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.10) 50%, rgba(255,255,255,.10) 75%, transparent 75%) 0 0/12px 12px;
+      border:1px solid rgba(255,255,255,.22);box-shadow:inset 0 0 0 2px rgba(0,0,0,.35);opacity:.9}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="host">
+      <div class="avatar"><img src="giorgione.png" alt="Giorgione"></div>
+      <div class="bubble"><div>Inserisci il codice della cassaforte: prima LEI e poi LUI.</div></div>
+    </div>
+
+    <div class="card">
+      <h1>🔐 Cassaforte</h1>
+      
+      <div class="safe-stage" id="stage">
+        <div class="bodySafe"></div>
+        <div class="hinge"></div>
+        <div class="door">
+          <div class="display" id="disp">------</div>
+          <div class="dial"></div>
+          <div class="bolt"></div>
+        </div>
+      </div>
+
+      <div class="kbd">
+        <button onclick="press(1)">1</button><button onclick="press(2)">2</button><button onclick="press(3)">3</button>
+        <button onclick="press(4)">4</button><button onclick="press(5)">5</button><button onclick="press(6)">6</button>
+        <button onclick="press(7)">7</button><button onclick="press(8)">8</button><button onclick="press(9)">9</button>
+        <button onclick="back()">⌫</button><button onclick="press(0)">0</button><button onclick="ok()">OK</button>
+      </div>
+
+      <div class="hint" id="hint"></div>
+      <div class="msg" id="msg"></div>
+    </div>
+
+    <div class="voucher hidden" id="voucher">
+      <div class="stamp"><span>VALIDO<br/>BUONO<br/>REGALO</span></div>
+      <div class="topline">BUONO REGALO</div>
+      <div class="title">🍽️ Cena per 2</div>
+      <div class="place"><b>All’Ora d’Aria</b> — Firenze</div>
+      <div class="note">Da usare quando volete entro un anno. Buon appetito!</div>
+      </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const from = params.get('from');
+    const got  = params.get('code');
+
+    const hint = document.getElementById('hint');
+    hint.textContent = (from && got)
+      ? `Arrivo da: ${from}. Codice ottenuto: ${got}.`
+      : `Suggerimento: 6 cifre totali (3+3).`;
+
+    let input = "";
+    function renderDisp(){
+      document.getElementById("disp").textContent = input.padEnd(6,"-");
+      document.getElementById("msg").textContent = "";
+    }
+
+    window.press = (n)=>{ if(input.length<6){ input += String(n); renderDisp(); } };
+    window.back  = ()=>{ input = input.slice(0,-1); renderDisp(); };
+
+    window.ok = ()=>{
+      const msg = document.getElementById("msg");
+      if(input === "192784"){
+        msg.innerHTML = `<div class="ok">CODICE CORRETTO ✅ Apertura in corso…</div>`;
+        const stage = document.getElementById("stage");
+        stage.classList.add("open");
+        setTimeout(()=>document.getElementById("voucher").classList.remove("hidden"), 1100);
+      } else {
+        msg.innerHTML = `<div class="no">Codice errato ❌</div>`;
+      }
+    };
+
+    renderDisp();
+  </script>
+</body>
+</html>

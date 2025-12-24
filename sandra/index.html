@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quiz Sandra</title>
+  <style>
+    :root{--bg:#0f0f10;--card:#17171a;--card2:#1d1d22;--text:#fff;--muted:rgba(255,255,255,.78);
+      --border:rgba(255,255,255,.10);--btn:#2a2a2e;--good:#2bff4a;--bad:#ff4b4b;}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    .wrap{max-width:560px;margin:0 auto;padding:16px}
+    .host{display:flex;gap:12px;align-items:center;margin:10px 0 14px}
+    .avatar{width:76px;height:76px;border-radius:18px;background:var(--card);border:1px solid var(--border);
+      overflow:hidden;box-shadow:0 12px 26px rgba(0,0,0,.45)}
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .bubble{flex:1;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:10px 12px;
+      box-shadow:0 12px 26px rgba(0,0,0,.45)}
+    .bubble b{display:block;margin-bottom:4px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px;
+      box-shadow:0 14px 30px rgba(0,0,0,.50)}
+    h1,h2{margin:8px 0}
+    p{margin:10px 0;color:var(--muted);line-height:1.35}
+    .q{font-size:18px;color:#fff;margin:10px 0 12px}
+    .grid{display:grid;gap:10px}
+    button{width:100%;padding:12px 14px;border:0;border-radius:14px;background:var(--btn);color:#fff;font-size:16px;
+      box-shadow:0 10px 22px rgba(0,0,0,.35);text-align:left}
+    button:active{transform:translateY(1px)}
+    .meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;color:var(--muted);font-size:13px}
+    .pill{padding:6px 10px;border-radius:999px;background:var(--card2);border:1px solid var(--border)}
+    .right{color:var(--good);font-weight:800}
+    .wrong{color:var(--bad);font-weight:800}
+    .small{font-size:13px;color:var(--muted)}
+    .codebox{margin-top:12px;padding:12px;border-radius:16px;background:#0b0b0c;border:1px solid var(--border);
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;letter-spacing:.18em;font-size:22px;
+      color:var(--good);text-align:center;box-shadow:inset 0 0 0 2px rgba(43,255,74,.10)}
+  </style>
+</head>
+<body>
+  <div class="wrap" id="app"></div>
+
+  <script>
+    const questions = [
+      { q:"Gatti: le fusa indicano sempre e solo che il gatto è felice?",
+        a:["No: possono comparire anche in stress/dolore come auto-consolazione","Sì, sempre","Solo quando ha fame","Solo quando dorme"], c:0 },
+      { q:"Gatti: a cosa servono principalmente le vibrisse (baffi)?",
+        a:["Percezione tattile e orientamento nello spazio","Raffreddamento corporeo","Digestione","Produzione di vitamina D"], c:0 },
+      { q:"Fitness: quale esercizio è tra i più noti per enfatizzare il lavoro dei glutei?",
+        a:["Hip thrust","Curl bicipiti","Calf raise","Pullover"], c:0 },
+      { q:"Fitness: per serie di forza (carichi alti), quale recupero è spesso consigliato?",
+        a:["2–5 minuti","10–20 secondi","30–45 secondi","0 secondi"], c:0 },
+      { q:"Musica pop italiana: 'Brividi' è cantata da…",
+        a:["Mahmood & Blanco","Elodie & Marracash","Annalisa & Tiziano Ferro","Giorgia & Elisa"], c:0 },
+      { q:"Musica pop italiana: chi canta 'Tango'?",
+        a:["Tananai","Cesare Cremonini","Pinguini Tattici Nucleari","Ultimo"], c:0 },
+      { q:"Musica pop italiana: 'Italodisco' è un brano di…",
+        a:["The Kolors","Maneskin","Coma_Cose","La Rappresentante di Lista"], c:0 },
+      { q:"Musica pop italiana: 'La noia' (Sanremo 2024) è di…",
+        a:["Angelina Mango","Elodie","Annalisa","Emma"], c:0 },
+      { q:"Gatti: lo 'slow blink' (chiudere lentamente gli occhi) è spesso un segnale di…",
+        a:["Fiducia e calma","Aggressività imminente","Paura intensa","Territorialità"], c:0 },
+      { q:"Musica pop italiana: 'Due vite' (Sanremo 2023) è cantata da…",
+        a:["Marco Mengoni","Ultimo","Irama","Sangiovanni"], c:0 }
+    ];
+
+    let idx=0, score=0;
+
+    function header(text){
+      return `
+        <div class="host">
+          <div class="avatar"><img src="giorgione.png" alt="Giorgione"></div>
+          <div class="bubble"><div>${text}</div></div>
+        </div>`;
+    }
+
+    function render(){
+      const q = questions[idx];
+      document.getElementById("app").innerHTML = `
+        ${header(`Lucre sei alla domanda ${idx+1}/10. Ne servono almeno 7 per ottenere il codice.`)}
+        <div class="card">
+          <h2>Quiz di Sandra</h2>
+          <div class="q">${q.q}</div>
+          <div class="grid">
+            ${q.a.map((t,i)=>`<button onclick="answer(${i})">${String.fromCharCode(65+i)}. ${t}</button>`).join("")}
+          </div>
+          <div class="meta">
+            <div class="pill">Corrette: <b>${score}</b></div>
+            <div class="pill">Domanda: <b>${idx+1}/10</b></div>
+          </div>
+         </div>`;
+    }
+
+    window.answer = (choice)=>{
+      if(choice === questions[idx].c) score++;
+      idx++;
+
+      if(idx < questions.length) return render();
+
+      if(score >= 7){
+        document.getElementById("app").innerHTML = `
+          ${header(`Promossa ✅ Hai fatto ${score}/10. Codice sbloccato.`)}
+          <div class="card">
+            <h2 class="right">Il tuo codice è</h2>
+            <div class="codebox">192</div>
+            <p class="small">Ti porto alla cassaforte… (Ricorda: prima LEI poi LUI)</p>
+            <button onclick="goSafe()">Vai alla cassaforte</button>
+          </div>`;
+        setTimeout(goSafe, 18000);
+      } else {
+        document.getElementById("app").innerHTML = `
+          ${header(`Nope 😅 ${score}/10. Ne servono almeno 7.`)}
+          <div class="card">
+            <h2 class="wrong">RIPROVA</h2>
+            <button onclick="restart()">Rigioca</button>
+          </div>`;
+      }
+    };
+
+    function goSafe(){ location.href = "../safe/index.html?from=sandra&code=666"; }
+    function restart(){ idx=0; score=0; render(); }
+
+    render();
+  </script>
+</body>
+</html>
